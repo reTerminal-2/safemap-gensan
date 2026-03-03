@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer'
 import { Separator } from '@/components/ui/separator'
-import api from '@/lib/api'
+import { supabase } from '@/lib/supabase'
 
 export default function AdminQueue() {
     const [reports, setReports] = useState<any[]>([])
@@ -16,24 +16,43 @@ export default function AdminQueue() {
 
     const fetchReports = async () => {
         try {
-            const res = await api.get('/incidents')
-            setReports(res.data)
+            const { data, error } = await supabase
+                .from('incidents')
+                .select('*')
+                .order('created_at', { ascending: false })
+
+            if (error) throw error
+            setReports(data || [])
         } catch (error) {
-            console.error('Error fetching reports from MongoDB:', error)
+            console.error('Error fetching reports from Supabase:', error)
         }
     }
 
     useEffect(() => {
         fetchReports()
-        const interval = setInterval(fetchReports, 5000)
-        return () => clearInterval(interval)
+
+        const channel = supabase
+            .channel('public:incidents_admin_queue')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'incidents' }, () => {
+                fetchReports()
+            })
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+        }
     }, [])
 
     const filteredReports = reports.filter(r => r.status === activeTab)
 
     const handleUpdateStatus = async (id: string, status: string) => {
         try {
-            await api.patch(`/incidents/${id}/status`, { status })
+            const { error } = await supabase
+                .from('incidents')
+                .update({ status })
+                .eq('id', id)
+
+            if (error) throw error
             setSelectedReport(null)
             fetchReports()
         } catch (error) {
@@ -50,7 +69,7 @@ export default function AdminQueue() {
                         Validation Queue
                     </h1>
                     <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-1">
-                        Screening & Official Validation (MongoDB)
+                        Screening & Official Validation (Supabase)
                     </p>
                 </div>
             </div>
@@ -72,7 +91,7 @@ export default function AdminQueue() {
             <div className="space-y-3">
                 {filteredReports.map((report) => (
                     <Card
-                        key={report._id}
+                        key={report.id}
                         className="glass-card bg-white border-slate-200 hover:border-[#2b5ba9]/30 transition-all active:scale-[0.98] cursor-pointer shadow-sm"
                         onClick={() => setSelectedReport(report)}
                     >
@@ -92,7 +111,7 @@ export default function AdminQueue() {
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between mb-0.5">
                                     <span className="text-[10px] font-black text-slate-400 tracking-widest uppercase truncate mr-2">
-                                        CASE-{report._id.slice(-8).toUpperCase()}
+                                        CASE-{report.id.slice(-8).toUpperCase()}
                                     </span>
                                     <span className="text-[10px] text-slate-400 font-bold shrink-0">{new Date(report.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                 </div>
@@ -161,14 +180,14 @@ export default function AdminQueue() {
                                 {selectedReport.status === 'pending_review' ? (
                                     <div className="flex gap-4">
                                         <Button
-                                            onClick={() => handleUpdateStatus(selectedReport._id, 'verified')}
+                                            onClick={() => handleUpdateStatus(selectedReport.id, 'verified')}
                                             className="flex-1 h-14 rounded-2xl bg-green-600 hover:bg-green-700 text-white font-black gap-2 text-base shadow-lg shadow-green-100"
                                         >
                                             <Check size={20} />
                                             Verify Report
                                         </Button>
                                         <Button
-                                            onClick={() => handleUpdateStatus(selectedReport._id, 'dismissed')}
+                                            onClick={() => handleUpdateStatus(selectedReport.id, 'dismissed')}
                                             variant="ghost" className="h-14 w-14 rounded-2xl bg-red-50 text-red-600 hover:bg-red-100"
                                         >
                                             <X size={24} />

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { OfflineQueueItem, IncidentReport } from '@/types'
-import api from '@/lib/api'
+import { supabase } from '@/lib/supabase'
 
 const QUEUE_KEY = 'safemap_offline_queue'
 
@@ -64,17 +64,20 @@ export function useOfflineQueue() {
 
         for (const item of queue) {
             try {
-                // MongoDB expect location structure: { lat, lng }
+                // Prepare payload for Supabase
                 const payload = {
                     ...item.payload,
                     location: {
                         lat: (item.payload as any).latitude || 6.1167,
-                        lng: (item.payload as any).longitude || 125.1667
+                        lng: (item.payload as any).longitude || 125.1667,
+                        address: (item.payload as any).address || 'GenSan'
                     },
-                    is_offline_queued: true
+                    is_offline_queued: true,
+                    created_at: item.created_at
                 }
 
-                await api.post('/incidents', payload)
+                const { error } = await supabase.from('incidents').insert([payload])
+                if (error) throw error
             } catch (err) {
                 console.error('[OfflineQueue] Sync failed for item', item.id, err)
                 failed.push({
