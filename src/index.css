@@ -1,0 +1,186 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+
+    --radius: 0.75rem;
+
+    /* SAFEMAP Brand - Light Palette */
+    --navy: 222 47% 11%;
+    --pnp-blue: 221.2 83.2% 45.3%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    overscroll-behavior: none;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/20 rounded-full hover:bg-primary/40;
+  }
+}
+
+@layer components {
+
+  /* Leaflet map light mode adjustments */
+  .leaflet-container {
+    height: 100%;
+    width: 100%;
+    background: #f8fafc !important;
+    z-index: 0;
+  }
+
+  /* Light/Clean Map Theme */
+  .leaflet-tile-pane {
+    filter: grayscale(0.2) contrast(1.1) brightness(1.05) !important;
+  }
+
+  /* Soft shadow for the map container */
+  .leaflet-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.05);
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* Image Inspired Components */
+  .header-blue {
+    @apply bg-[#2b5ba9] text-white py-4 px-6 shadow-md;
+  }
+
+  .btn-submit-blue {
+    @apply bg-[#2b5ba9] hover:bg-[#1e4480] text-white font-bold py-2 px-8 rounded transition-all shadow-sm;
+  }
+
+  /* Structured cards with light shadows (Image inspiration) */
+  .glass-card {
+    @apply bg-white border border-slate-200 rounded-xl;
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 10px -2px rgba(0, 0, 0, 0.04);
+  }
+
+  .glass-card-heavy {
+    @apply bg-white border border-slate-200 rounded-2xl;
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+  }
+
+  .text-muted-foreground {
+    @apply text-slate-500;
+  }
+
+  .placeholder\:text-muted-foreground\/40::placeholder {
+    @apply text-slate-400;
+  }
+
+  /* Status badge variants */
+  .status-badge {
+    @apply px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border;
+  }
+
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 z-[2000];
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Pulse dot for live indicator */
+  .pulse-dot {
+    @apply relative inline-flex h-2.5 w-2.5;
+  }
+
+  .pulse-dot::before {
+    content: '';
+    @apply absolute inline-flex h-full w-full rounded-full bg-blue-500 opacity-75 animate-ping;
+  }
+
+  .pulse-dot::after {
+    content: '';
+    @apply relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500;
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+  }
+
+  .btn-shadow {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Image Inspired Labels */
+  .label-title {
+    @apply text-xs font-bold text-slate-700 mb-1 block;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent;
+  }
+
+  .safe-area-pb {
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+
+  .safe-area-pt {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
