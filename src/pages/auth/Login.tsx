@@ -11,7 +11,7 @@ export default function Login() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [isLoading, setIsLoading] = useState(false)
-    const { signIn } = useAuth()
+    const { signIn, setDemoRole } = useAuth()
     const navigate = useNavigate()
     const { toast } = useToast()
 
@@ -86,16 +86,47 @@ export default function Login() {
                     </form>
 
                     <div className="mt-8 text-center">
-                        <p className="text-sm text-muted-foreground">
-                            Don't have an account?{' '}
-                            <Link to="/register" className="text-[#2b5ba9] font-bold hover:underline">
-                                Register as Official
-                            </Link>
+                        <p className="text-sm text-muted-foreground font-medium">
+                            Official Institutional Access
                         </p>
-                        <div className="mt-4 pt-4 border-t border-slate-100">
-                            <Link to="/" className="text-xs text-muted-foreground hover:text-slate-900 transition-colors">
-                                Continue as Anonymous Citizen
-                            </Link>
+
+                        <div className="mt-4 grid grid-cols-2 gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-[10px] font-black uppercase tracking-tighter border-slate-200 hover:bg-slate-50"
+                                onClick={() => {
+                                    setDemoRole('pnp_officer')
+                                    navigate('/')
+                                }}
+                            >
+                                PNP Demo
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-[10px] font-black uppercase tracking-tighter border-slate-200 hover:bg-slate-50"
+                                onClick={() => {
+                                    setDemoRole('dilg_admin')
+                                    navigate('/')
+                                }}
+                            >
+                                DILG Admin Demo
+                            </Button>
+                        </div>
+
+                        <div className="mt-6 flex flex-col gap-2">
+                            <p className="text-sm text-muted-foreground">
+                                Don't have an account?{' '}
+                                <Link to="/register" className="text-[#2b5ba9] font-bold hover:underline">
+                                    Register as Official
+                                </Link>
+                            </p>
+                            <div className="pt-4 border-t border-slate-100">
+                                <Link to="/" className="text-xs text-[#2b5ba9] font-black uppercase tracking-widest hover:text-slate-900 transition-colors">
+                                    Continue as Anonymous Citizen
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </CardContent>

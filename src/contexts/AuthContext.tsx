@@ -6,6 +6,7 @@ interface AuthContextValue {
     user: User | null
     isLoading: boolean
     isAuthenticated: boolean
+    isDemo: boolean
     signIn: (email: string, password: string) => Promise<{ error: string | null }>
     signUp: (email: string, password: string, data: Partial<User>) => Promise<{ error: string | null }>
     signOut: () => Promise<void>
@@ -59,52 +60,60 @@ const DEMO_USERS: Record<User['role'], User> = {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<User | null>(DEMO_USERS.public)
+    const [user, setUser] = useState<User | null>(null)
     const [isLoading, setIsLoading] = useState(true)
 
     useEffect(() => {
         const checkAuth = async () => {
-            const { data: { session } } = await supabase.auth.getSession()
+            try {
+                const { data: { session } } = await supabase.auth.getSession()
 
-            if (session?.user) {
-                try {
+                if (session?.user) {
                     const { data: profile, error } = await supabase
                         .from('users')
                         .select('*')
                         .eq('id', session.user.id)
                         .single()
 
-                    if (error) throw error
-
-                    setUser({
-                        id: session.user.id,
-                        email: session.user.email || '',
-                        full_name: profile.full_name,
-                        role: profile.role,
-                        is_verified: profile.is_verified,
-                        badge_number: profile.badge_number,
-                        station: profile.station,
-                        department: profile.department,
-                        barangay_id: profile.barangay_id,
-                        created_at: profile.created_at,
-                        updated_at: profile.updated_at,
-                    })
-                } catch (err) {
-                    console.error('Failed to fetch user profile:', err)
-                    setUser(DEMO_USERS.public)
+                    if (error) {
+                        console.warn('Profile not found, using auth metadata:', error)
+                        // Fallback to metadata if profile table entry is missing
+                        setUser({
+                            id: session.user.id,
+                            email: session.user.email || '',
+                            full_name: session.user.user_metadata?.full_name || 'Generic User',
+                            role: session.user.user_metadata?.role || 'public',
+                            is_verified: false,
+                            created_at: session.user.created_at,
+                            updated_at: session.user.created_at,
+                        })
+                    } else {
+                        setUser(profile as User)
+                    }
+                } else {
+                    // Check if there was a demo session in local storage or just clear
+                    const savedDemoRole = localStorage.getItem('demo-role')
+                    if (savedDemoRole && DEMO_USERS[savedDemoRole as User['role']]) {
+                        setUser(DEMO_USERS[savedDemoRole as User['role']])
+                    } else {
+                        setUser(null)
+                    }
                 }
-            } else {
-                setUser(DEMO_USERS.public)
+            } catch (err) {
+                console.error('Auth verification failed:', err)
+                setUser(null)
+            } finally {
+                setIsLoading(false)
             }
-            setIsLoading(false)
         }
 
         checkAuth()
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            if (!session) {
-                setUser(DEMO_USERS.public)
-            } else {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_OUT') {
+                setUser(null)
+                localStorage.removeItem('demo-role')
+            } else if (session) {
                 checkAuth()
             }
         })
@@ -159,10 +168,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const signOut = async () => {
         await supabase.auth.signOut()
-        setUser(DEMO_USERS.public)
+        localStorage.removeItem('demo-role')
+        setUser(null)
     }
 
     const setDemoRole = (role: User['role']) => {
+        localStorage.setItem('demo-role', role)
         setUser(DEMO_USERS[role])
     }
 
@@ -172,6 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 user,
                 isLoading,
                 isAuthenticated: !!user && !user.id.startsWith('demo-'),
+                isDemo: !!user && user.id.startsWith('demo-'),
                 signIn,
                 signUp,
                 signOut,
