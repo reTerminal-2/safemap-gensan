@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { FileText, Camera, Users, ShieldCheck, ChevronRight, ChevronLeft, Loader2, MapPin } from 'lucide-react'
+import { FileText, Camera, Users, ShieldCheck, ChevronRight, ChevronLeft, MapPin } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { incidentStep1Schema, incidentStep2Schema, incidentStep3Schema, type IncidentReportForm } from '@/schemas/incident.schema'
 import { useOfflineQueue } from '@/hooks/useOfflineQueue'
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { Separator } from '@/components/ui/separator'
+import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/contexts/AuthContext'
 

@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import {
     Map, Bell, LayoutDashboard,
-    FileText, Shield, BarChart3, Settings, LogOut, MessageSquare, Lock
+    FileText, Shield, Settings, LogOut, MessageSquare, Lock
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/contexts/AuthContext'

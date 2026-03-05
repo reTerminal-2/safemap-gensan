@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase'
-import type { MapAlert, IncidentReport } from '@/types'
 
 // Mock Data for Hotspots (Static for now)
 const MOCK_HOTSPOTS = [

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { MapPin, Send, Shield, Trash2, Clock } from 'lucide-react'
-import { useAuth } from '@/contexts/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -22,7 +21,6 @@ interface Alert {
 }
 
 export default function AdminAlerts() {
-    const { user } = useAuth()
     const [alerts, setAlerts] = useState<Alert[]>([])
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
